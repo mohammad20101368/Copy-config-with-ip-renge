@@ -27,9 +27,9 @@ document.getElementById("configForm").addEventListener("submit", function (e) {
     const totalIps = Math.pow(2, 32 - subnet);
     const endIp = startIp + totalIps - 1;
 
-    // تولید رنج IP
+    // تولید رنج IP و محدود کردن به ۲۵ عدد
     const ipRange = [];
-    for (let i = startIp; i <= endIp; i++) {
+    for (let i = startIp; i <= endIp && ipRange.length < 25; i++) {
         ipRange.push(decimalToIp(i));
     }
 
