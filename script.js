@@ -1,22 +1,29 @@
 document.getElementById("configForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const startIp = document.getElementById("startIp").value;
-    const endIp = document.getElementById("endIp").value;
+    const cidrRange = document.getElementById("cidrRange").value;
 
-    // Parse start and end IPs
-    const startParts = startIp.split('.').map(Number);
-    const endParts = endIp.split('.').map(Number);
-
-    // Validate IP ranges
-    if (startParts.length !== 4 || endParts.length !== 4) {
-        alert("Invalid IP format. Please enter valid IPv4 addresses.");
+    // Parse CIDR range
+    const [baseIp, subnet] = cidrRange.split("/");
+    if (!baseIp || !subnet || isNaN(subnet)) {
+        alert("Invalid CIDR format. Please enter a valid CIDR range (e.g., 192.168.1.0/24).");
         return;
     }
 
-    let ipRange = [];
-    for (let i = startParts[3]; i <= endParts[3]; i++) {
-        ipRange.push(`${startParts[0]}.${startParts[1]}.${startParts[2]}.${i}`);
+    const ipParts = baseIp.split(".").map(Number);
+    if (ipParts.length !== 4 || ipParts.some(part => part < 0 || part > 255)) {
+        alert("Invalid base IP address. Please enter a valid IPv4 address.");
+        return;
+    }
+
+    const startIp = ipToDecimal(ipParts);
+    const totalIps = Math.pow(2, 32 - subnet);
+    const endIp = startIp + totalIps - 1;
+
+    // Generate IP range
+    const ipRange = [];
+    for (let i = startIp; i <= endIp; i++) {
+        ipRange.push(decimalToIp(i));
     }
 
     // Generate VLESS config
@@ -51,3 +58,21 @@ document.getElementById("configForm").addEventListener("submit", function (e) {
     // Display config as JSON
     document.getElementById("output").value = JSON.stringify(config, null, 4);
 });
+
+function ipToDecimal(ipParts) {
+    return (
+        (ipParts[0] << 24) +
+        (ipParts[1] << 16) +
+        (ipParts[2] << 8) +
+        ipParts[3]
+    );
+}
+
+function decimalToIp(decimal) {
+    return [
+        (decimal >>> 24) & 255,
+        (decimal >>> 16) & 255,
+        (decimal >>> 8) & 255,
+        decimal & 255
+    ].join(".");
+                }
