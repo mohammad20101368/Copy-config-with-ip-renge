@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VLESS Config Generator</title>
+    <title>VLESS Link Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>VLESS Config Generator</h1>
+        <h1>VLESS Link Generator</h1>
         <form id="configForm">
-            <label for="baseConfig">Base Config (JSON):</label>
-            <textarea id="baseConfig" placeholder='Enter base config JSON here...' rows="10" required></textarea>
+            <label for="baseLink">Base VLESS Link:</label>
+            <textarea id="baseLink" placeholder='Enter base VLESS link here...' rows="5" required></textarea>
 
             <label for="cidrRange">CIDR Range:</label>
             <input type="text" id="cidrRange" placeholder="e.g., 192.168.1.0/24" required>
 
-            <button type="submit">Generate Config</button>
+            <button type="submit">Generate Links</button>
         </form>
 
-        <h2>Generated Config</h2>
+        <h2>Generated Links</h2>
         <textarea id="output" rows="20" readonly></textarea>
     </div>
     <script src="script.js"></script>
