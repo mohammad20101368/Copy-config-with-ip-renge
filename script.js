@@ -1,9 +1,21 @@
 document.getElementById("configForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
+    // گرفتن مقادیر فرم
+    const baseConfigInput = document.getElementById("baseConfig").value;
     const cidrRange = document.getElementById("cidrRange").value;
 
-    // Parse CIDR range
+    let baseConfig;
+
+    // بررسی و تجزیه JSON کانفیگ اولیه
+    try {
+        baseConfig = JSON.parse(baseConfigInput);
+    } catch (err) {
+        alert("Invalid JSON format in Base Config. Please fix it and try again.");
+        return;
+    }
+
+    // تجزیه و بررسی CIDR
     const [baseIp, subnet] = cidrRange.split("/");
     if (!baseIp || !subnet || isNaN(subnet)) {
         alert("Invalid CIDR format. Please enter a valid CIDR range (e.g., 192.168.1.0/24).");
@@ -20,43 +32,28 @@ document.getElementById("configForm").addEventListener("submit", function (e) {
     const totalIps = Math.pow(2, 32 - subnet);
     const endIp = startIp + totalIps - 1;
 
-    // Generate IP range
+    // تولید رنج IP
     const ipRange = [];
     for (let i = startIp; i <= endIp; i++) {
         ipRange.push(decimalToIp(i));
     }
 
-    // Generate VLESS config
-    const config = {
-        log: {
-            loglevel: "info"
-        },
-        inbounds: [
-            {
-                port: 443,
-                protocol: "vless",
-                settings: {
-                    clients: ipRange.map(ip => ({
-                        id: ip,
-                        level: 0,
-                        email: `user_${ip}@example.com`
-                    }))
-                },
-                streamSettings: {
-                    network: "tcp"
-                }
-            }
-        ],
-        outbounds: [
-            {
-                protocol: "freedom",
-                settings: {}
-            }
-        ]
-    };
+    // اضافه کردن کلاینت‌ها به کانفیگ
+    const clients = ipRange.map(ip => ({
+        id: ip,
+        level: 0,
+        email: `user_${ip}@example.com`
+    }));
 
-    // Display config as JSON
-    document.getElementById("output").value = JSON.stringify(config, null, 4);
+    if (!baseConfig.inbounds || !Array.isArray(baseConfig.inbounds) || baseConfig.inbounds.length === 0) {
+        alert("Base config must include at least one 'inbound' object.");
+        return;
+    }
+
+    baseConfig.inbounds[0].settings.clients = clients;
+
+    // نمایش کانفیگ نهایی
+    document.getElementById("output").value = JSON.stringify(baseConfig, null, 4);
 });
 
 function ipToDecimal(ipParts) {
@@ -75,4 +72,4 @@ function decimalToIp(decimal) {
         (decimal >>> 8) & 255,
         decimal & 255
     ].join(".");
-                }
+        }
