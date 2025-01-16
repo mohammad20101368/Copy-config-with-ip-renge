@@ -1,21 +1,16 @@
 document.getElementById("configForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    // گرفتن مقادیر فرم
-    const baseConfigInput = document.getElementById("baseConfig").value;
-    const cidrRange = document.getElementById("cidrRange").value;
+    const baseLink = document.getElementById("baseLink").value.trim();
+    const cidrRange = document.getElementById("cidrRange").value.trim();
 
-    let baseConfig;
-
-    // بررسی و تجزیه JSON کانفیگ اولیه
-    try {
-        baseConfig = JSON.parse(baseConfigInput);
-    } catch (err) {
-        alert("Invalid JSON format in Base Config. Please fix it and try again.");
+    // بررسی صحت لینک پایه
+    if (!baseLink.startsWith("vless://")) {
+        alert("Invalid base VLESS link. Please start with 'vless://'.");
         return;
     }
 
-    // تجزیه و بررسی CIDR
+    // تجزیه CIDR
     const [baseIp, subnet] = cidrRange.split("/");
     if (!baseIp || !subnet || isNaN(subnet)) {
         alert("Invalid CIDR format. Please enter a valid CIDR range (e.g., 192.168.1.0/24).");
@@ -38,22 +33,13 @@ document.getElementById("configForm").addEventListener("submit", function (e) {
         ipRange.push(decimalToIp(i));
     }
 
-    // اضافه کردن کلاینت‌ها به کانفیگ
-    const clients = ipRange.map(ip => ({
-        id: ip,
-        level: 0,
-        email: `user_${ip}@example.com`
-    }));
+    // تولید لینک‌های جدید با تغییر فقط IP
+    const links = ipRange.map(ip => {
+        return baseLink.replace(/@(.*?):/, `@${ip}:`);
+    });
 
-    if (!baseConfig.inbounds || !Array.isArray(baseConfig.inbounds) || baseConfig.inbounds.length === 0) {
-        alert("Base config must include at least one 'inbound' object.");
-        return;
-    }
-
-    baseConfig.inbounds[0].settings.clients = clients;
-
-    // نمایش کانفیگ نهایی
-    document.getElementById("output").value = JSON.stringify(baseConfig, null, 4);
+    // نمایش لینک‌های نهایی
+    document.getElementById("output").value = links.join("\n");
 });
 
 function ipToDecimal(ipParts) {
