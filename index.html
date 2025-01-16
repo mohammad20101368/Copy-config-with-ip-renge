@@ -10,6 +10,9 @@
     <div class="container">
         <h1>VLESS Config Generator</h1>
         <form id="configForm">
+            <label for="baseConfig">Base Config (JSON):</label>
+            <textarea id="baseConfig" placeholder='Enter base config JSON here...' rows="10" required></textarea>
+
             <label for="cidrRange">CIDR Range:</label>
             <input type="text" id="cidrRange" placeholder="e.g., 192.168.1.0/24" required>
 
